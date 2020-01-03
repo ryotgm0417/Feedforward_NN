@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
+# from sklearn.preprocessing import OneHotEncoder
+import time
 
 # データの読み込み（MNIST手書き文字）
 def read_mnist():
@@ -8,14 +9,28 @@ def read_mnist():
     test_df = pd.read_csv('data/mnist-in-csv/mnist_test.csv', sep=',')      # パス
 
     train_data = train_df.iloc[:,1:].to_numpy(dtype='float')
-    train_target = train_df.iloc[:,0].to_numpy(dtype='int')
-    train_target = OneHotEncoder(sparse=False).fit_transform(train_target.reshape(-1, 1))
+    train_target_indices = train_df.iloc[:,0].to_numpy(dtype='int')
+    train_target = np.zeros((len(train_target_indices),10))
+    for i in range(len(train_target_indices)):
+        train_target[i,train_target_indices[i]] = 1
+    # train_target = OneHotEncoder(sparse=False).fit_transform(train_target.reshape(-1, 1))
 
     test_data = test_df.iloc[:,1:].to_numpy(dtype='float')
-    test_target = test_df.iloc[:,0].to_numpy(dtype='int')
-    test_target = OneHotEncoder(sparse=False).fit_transform(test_target.reshape(-1, 1))
+    test_target_indices = test_df.iloc[:,0].to_numpy(dtype='int')
+    test_target = np.zeros((len(test_target_indices),10))
+    for i in range(len(test_target_indices)):
+        test_target[i,test_target_indices[i]] = 1
+    # test_target = OneHotEncoder(sparse=False).fit_transform(test_target.reshape(-1, 1))
 
     return train_df, train_data, train_target, test_df, test_data, test_target
+
+
+def add_noise(data, p=0.1):
+    indices = np.random.random(data.shape) < p
+    random_noise = np.random.random(data.shape)
+    tmp = data.copy()
+    tmp[indices] = random_noise[indices]
+    return tmp
 
 
 ##################################
@@ -88,10 +103,13 @@ class Network:
         self.test_size = test_size
         self.epochs = epochs
         self.lr = lr
+        self.train_curve = np.zeros(epochs)
 
     def train(self, train_data, train_target):      # 訓練
+        start = time.time()
         for epoch in range(self.epochs):
             error = 0
+            correct_number = 0
 
             for i in range(self.train_size):
                 x = train_data[i]
@@ -103,14 +121,25 @@ class Network:
 
                 error += self.layers[-1].calculate_error(t)
 
+                predict = np.argmax(x)
+                correct_value = np.argmax(t)
+                if predict == correct_value:
+                    correct_number += 1
+
                 for layer in reversed(self.layers):
                     dout = layer.backward(dout)
 
                 for layer in self.layers:
                     layer.update_weights(self.lr)
 
-            if epoch % 1 == 0:
+            if epoch % 5 == 0:
                 print("Epoch no. {}, error is {}".format(epoch, error))
+
+            self.train_curve[epoch] = correct_number*1.0/self.train_size
+
+        end = time.time()
+        self.train_time = end - start
+        print("Training Done. Elapsed Time: {} [s]".format(self.train_time))
 
 
     def test(self, test_data, test_target):     # 検証
@@ -129,4 +158,6 @@ class Network:
             if predict == correct_value:
                 correct_number += 1
 
-        print("Accuracy: {}".format(correct_number*1.0/TEST_SIZE))
+        self.test_accuracy = correct_number*1.0/self.test_size
+
+        print("Accuracy: {}".format(self.test_accuracy))

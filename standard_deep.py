@@ -1,8 +1,9 @@
 from feedforward import *
+import matplotlib.pyplot as plt
 
 TRAIN_SIZE = 2000        # 訓練データ数
 TEST_SIZE = 2000         # テストデータ数
-EPOCHS = 500             # エポック数
+EPOCHS = 10             # エポック数
 LEARNING_RATE = 0.01     # 学習率
 
 train_df, train_data, train_target, test_df, test_data, test_target = read_mnist()
@@ -37,3 +38,6 @@ layers = [l1, f1, l2, f2, l3, out]
 network = Network(layers, TRAIN_SIZE, TEST_SIZE, EPOCHS, LEARNING_RATE)
 network.train(train_data, train_target)
 network.test(test_data, test_target)
+
+plt.plot(network.train_curve)
+plt.show()
