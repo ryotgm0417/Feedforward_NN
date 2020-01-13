@@ -9,11 +9,11 @@ feedforward.py内の以下の行（第8,9行）のパスを書き換える：
 >      train_df = pd.read_csv('data/mnist-in-csv/mnist_train.csv', sep=',')    # パス
 >      test_df = pd.read_csv('data/mnist-in-csv/mnist_test.csv', sep=',')      # パス
 
-その後、ターミナルでpython3 <ファイル名> として noise_impact.py, noise_robustness.py, deep_learning.py のいずれかを実行
+その後、ターミナルでpython3 <ファイル名> として実行ファイルのいずれかを実行
 
 <b>ファイル説明：</b><br>
 feedforward.py ------ ニューラルネットの実装の主要部（クラス・関数の定義）<br>
-noise_impact.py, noise_robustness.py, deep_learning.py ------ 実行ファイル<Br>
+noise_impact.py, noise_robustness.py, deep_learning.py, standard_deep.py ------ 実行ファイル<Br>
 
 <b>使っているデータセット：</b><br>
 出典：https://www.kaggle.com/oddrationale/mnist-in-csv
